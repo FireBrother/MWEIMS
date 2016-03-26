@@ -28,7 +28,7 @@ using std::tr1::unordered_set;
 #include <deque>
 #include <fstream>
 #include <sstream>
-
+#include "..\\Unicode.h"
 
 namespace std {
 

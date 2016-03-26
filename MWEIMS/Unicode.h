@@ -46,6 +46,11 @@ std::string Unicode2gbk(Unicode unicode) {
 }
 
 std::ostream& operator << (std::ostream& os, const Unicode& unicode) {
-	os << Unicode2gbk(unicode.c_str());
+	os << "u\"" + Unicode2gbk(unicode.c_str()) + "\"";
 	return os;
+}
+
+std::ofstream& operator << (std::ofstream& ofs, const Unicode& unicode) {
+	ofs << Unicode2gbk(unicode.c_str());
+	return ofs;
 }
