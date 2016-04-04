@@ -18,13 +18,25 @@ trie_t global_trigram;
 pmi_t global_pmi;
 ent_t global_le, global_re, global_ent;
 
+Unicode P_set = u"£¬¡£¡¢£»¡®¡¾¡¿¡¶¡·£¿£º¡°¡±{}£¡@#£¤%¡­&*£¨£©-=¡ª+,./;'[]\\<>?:\"{} | !@#$%^&*() -= _ +¡º¡» ";
+bool is_P(Unicode unicode) {
+	for (auto c : unicode) {
+		if (P_set.find(c) == P_set.npos)
+			return false;
+	}
+	return true;
+}
+bool is_P(std::string s) {
+	return is_P(gbk2Unicode(s));
+}
+
 template<typename T>
 double log2(T v) {
 	return log(v) / log(2);
 }
 
 template<typename TDICT, typename TKEY, typename TVALUE>
-TVALUE setdefault(TDICT dict, TKEY key, TVALUE value) {
+TVALUE get(TDICT &dict, TKEY key, TVALUE value) {
 	if (dict.find(key) != dict.end()) {
 		value = dict[key];
 	}
@@ -66,6 +78,11 @@ int init_ngram(std::vector<std::string> filenames, trie_t *punigram = &global_un
 			std::string s1 = "";
 			std::string s2 = "";
 			for (auto word : words) {
+				if (word == "¡ú") continue;
+				if (is_P(word)) {
+					s1 = s2 = "";
+					continue;
+				}
 				unigram[gbk2Unicode(word)]++;
 				if (s2 != "") {
 					bigram[gbk2Unicode(make_bigram(s2, word))]++;
@@ -112,23 +129,17 @@ int init_pmi(pmi_t *ppmi = &global_pmi, trie_t *punigram = &global_unigram, trie
 	return 0;
 }
 
-int init_ent(ent_t *ple = &global_le, ent_t *pre = &global_re, ent_t *pent = &global_ent,
-			trie_t *punigram = &global_unigram, trie_t *pbigram = &global_bigram, trie_t *ptrigram = &global_trigram) {
+int init_ent(ent_t *ple = &global_le, ent_t *pre = &global_re, trie_t *punigram = &global_unigram,
+			trie_t *pbigram = &global_bigram, trie_t *ptrigram = &global_trigram) {
 	LogInfo("Calculating entropy started.");
 	auto &unigram = *punigram;
 	auto &bigram = *pbigram;
 	auto &trigram = *ptrigram;
 	auto &le = *ple;
 	auto &re = *pre;
-	auto &ent = *pent;
 	le.clear();
 	re.clear();
-	ent.clear();
 
-	long long tot_bi = 0, tot_tri = 0;
-	for_each(bigram.begin(), bigram.end(), [&](auto x) {tot_bi += x.second; });
-	for_each(trigram.begin(), trigram.end(), [&](auto x) {tot_tri += x.second; });
-	LogDebug("bigram tot freq: %lld, trigram tot freq: %lld.", tot_bi, tot_tri);
 	//´úÂëÐ§ÂÊÌ«µÍ£¬·ÏÆú
 	//for (auto b : bigram) {
 	//	auto wb = b.first;
@@ -155,12 +166,19 @@ int init_ent(ent_t *ple = &global_le, ent_t *pre = &global_re, ent_t *pent = &gl
 		auto rb = tr.first.substr(tr.first.find(u'¡ú') + 1);
 		auto lb = tr.first.substr(0, tr.first.rfind(u'¡ú'));
 		auto ru = tr.first.substr(tr.first.rfind(u'¡ú') + 1);
-		double lp = (double(trigram[tr.first]) / tot_tri) / (double(bigram[rb]) / tot_bi);
-		double rp = (double(trigram[tr.first]) / tot_tri) / (double(bigram[lb]) / tot_bi);
+		double lp = double(trigram[tr.first]) / double(bigram[rb]);
+		double rp = double(trigram[tr.first]) / double(bigram[lb]);
 		le[rb] -= lp * log2(lp);
 		re[lb] -= rp * log2(rp);
-		ent[rb] -= lp * log2(lp);
-		ent[lb] -= rp * log2(rp);
+	}
+
+	for (auto b : bigram) {
+		auto lu = b.first.substr(0, b.first.find(u'¡ú'));
+		auto ru = b.first.substr(b.first.find(u'¡ú') + 1);
+		double lp = double(bigram[b.first]) / double(unigram[ru]);
+		double rp = double(bigram[b.first]) / double(unigram[lu]);
+		le[ru] -= lp * log2(lp);
+		re[lu] -= rp * log2(rp);
 	}
 
 	LogInfo("Calculating entropy finished.");
