@@ -7,6 +7,34 @@
 
 typedef std::u16string Unicode;
 
+Unicode P_set = u"£¬¡£¡¢£»¡®¡¾¡¿¡¶¡·£¿£º¡°¡±{}£¡@#£¤%¡­&*£¨£©-=¡ª+,./;'[]\\<>?:\"{} | !@#$%^&*() -= _ +¡º¡» ";
+
+template<typename T>
+double log2(T v) {
+	return log(v) / log(2);
+}
+
+template<typename TDICT, typename TKEY, typename TVALUE>
+TVALUE get(TDICT &dict, TKEY key, TVALUE value) {
+	if (dict.find(key) != dict.end()) {
+		value = dict[key];
+	}
+	return value;
+}
+
+std::string make_bigram(std::string s1, std::string s2, std::string delim = "¡ú") {
+	return s1 + delim + s2;
+}
+Unicode make_bigram(Unicode s1, Unicode s2, Unicode delim = u"¡ú") {
+	return s1 + delim + s2;
+}
+std::string make_trigram(std::string s1, std::string s2, std::string s3, std::string delim = "¡ú") {
+	return s1 + delim + s2 + delim + s3;
+}
+Unicode make_trigram(Unicode s1, Unicode s2, Unicode s3, Unicode delim = u"¡ú") {
+	return s1 + delim + s2 + delim + s3;
+}
+
 BOOL MByteToWChar(LPCSTR lpcszStr, LPWSTR lpwszStr, DWORD dwSize) {
 	DWORD dwMinSize;
 	dwMinSize = MultiByteToWideChar(CP_ACP, 0, lpcszStr, -1, NULL, 0);
@@ -53,4 +81,15 @@ std::ostream& operator << (std::ostream& os, const Unicode& unicode) {
 std::ofstream& operator << (std::ofstream& ofs, const Unicode& unicode) {
 	ofs << Unicode2gbk(unicode.c_str());
 	return ofs;
+}
+
+bool is_P(Unicode unicode) {
+	for (auto c : unicode) {
+		if (P_set.find(c) == P_set.npos)
+			return false;
+	}
+	return true;
+}
+bool is_P(std::string s) {
+	return is_P(gbk2Unicode(s));
 }

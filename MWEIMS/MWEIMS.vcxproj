@@ -150,6 +150,7 @@
     <ClCompile Include="source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cutter.h" />
     <ClInclude Include="Limonp\Logger.hpp" />
     <ClInclude Include="Limonp\StdExtension.hpp" />
     <ClInclude Include="Limonp\StringUtil.hpp" />

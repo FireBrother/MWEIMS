@@ -18,44 +18,6 @@ trie_t global_trigram;
 pmi_t global_pmi;
 ent_t global_le, global_re, global_ent;
 
-Unicode P_set = u"£¬¡£¡¢£»¡®¡¾¡¿¡¶¡·£¿£º¡°¡±{}£¡@#£¤%¡­&*£¨£©-=¡ª+,./;'[]\\<>?:\"{} | !@#$%^&*() -= _ +¡º¡» ";
-bool is_P(Unicode unicode) {
-	for (auto c : unicode) {
-		if (P_set.find(c) == P_set.npos)
-			return false;
-	}
-	return true;
-}
-bool is_P(std::string s) {
-	return is_P(gbk2Unicode(s));
-}
-
-template<typename T>
-double log2(T v) {
-	return log(v) / log(2);
-}
-
-template<typename TDICT, typename TKEY, typename TVALUE>
-TVALUE get(TDICT &dict, TKEY key, TVALUE value) {
-	if (dict.find(key) != dict.end()) {
-		value = dict[key];
-	}
-	return value;
-}
-
-std::string make_bigram(std::string s1, std::string s2, std::string delim = "¡ú") {
-	return s1 + delim + s2;
-}
-Unicode make_bigram(Unicode s1, Unicode s2, Unicode delim = u"¡ú") {
-	return s1 + delim + s2;
-}
-std::string make_trigram(std::string s1, std::string s2, std::string s3, std::string delim = "¡ú") {
-	return s1 + delim + s2 + delim + s3;
-}
-Unicode make_trigram(Unicode s1, Unicode s2, Unicode s3, Unicode delim = u"¡ú") {
-	return s1 + delim + s2 + delim + s3;
-}
-
 int init_ngram(std::vector<std::string> filenames, trie_t *punigram = &global_unigram,
 				trie_t *pbigram = &global_bigram, trie_t *ptrigram = &global_trigram) {
 	LogInfo("Initing ngram started.");
@@ -70,7 +32,7 @@ int init_ngram(std::vector<std::string> filenames, trie_t *punigram = &global_un
 		std::string buff;
 		std::fstream fin(filename);
 		if (!fin) {
-			LogFatal("no such file %s", filename);
+			LogFatal("no such file %s", filename.c_str());
 		}
 		while (std::getline(fin, buff)) {
 			std::vector<std::string>  words;

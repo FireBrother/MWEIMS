@@ -1,9 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Unicode.h"
 #include "ngram.h"
+#include "cutter.h"
 using namespace std;
 
-enum debug_mode_t { debug_mode_bigram };
+enum debug_mode_t { debug_mode_bigram, debug_mode_dict};
 void debug_shell(debug_mode_t debug_mode) {
 	cout << "debug shell" << endl;
 	switch (debug_mode) {
@@ -22,8 +23,13 @@ void debug_shell(debug_mode_t debug_mode) {
 			printf("le %s: %lf\n", make_bigram(a, b).c_str(), global_le[gbk2Unicode(make_bigram(a, b))]);
 			printf("re %s: %lf\n\n", make_bigram(a, b).c_str(), global_re[gbk2Unicode(make_bigram(a, b))]);
 		}
+	case debug_mode_dict:
+		while (true) {
+			string s;
+			cin >> s;
+			printf("dict %s: %lf\n", s.c_str(), cutter::global_dict[gbk2Unicode(s)]);
+		}
 	}
-	
 }
 
 template<typename TDICT>
@@ -88,5 +94,10 @@ void calc_statistic() {
 }
 
 int main() {
-	calc_statistic();
+	// calc_statistic();
+	cutter::init_dict({ "data\\jieba.dict" });
+	for (auto a : cutter::cut("我和旭彤今儿吃完饭去未名湖溜达半圈来着")) {
+		cout << a << endl;
+	}
+	debug_shell(debug_mode_dict);
 }
