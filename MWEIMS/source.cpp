@@ -96,7 +96,7 @@ void calc_statistic() {
 int main() {
 	// calc_statistic();
 	cutter::init_dict({ "data\\jieba.dict" });
-	for (auto a : cutter::cut("我和旭彤今儿吃完饭去未名湖溜达半圈来着")) {
+	for (auto a : cutter::cut("完成")) {
 		cout << a << endl;
 	}
 	debug_shell(debug_mode_dict);
