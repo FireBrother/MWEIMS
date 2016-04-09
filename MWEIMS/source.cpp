@@ -96,7 +96,7 @@ void calc_statistic() {
 int main() {
 	// calc_statistic();
 	cutter::init_dict({ "data\\jieba.dict" });
-	for (auto a : cutter::cut("Íê³É")) {
+	for (auto a : cutter::cut("¿Õ ¸ñ")) {
 		cout << a << endl;
 	}
 	debug_shell(debug_mode_dict);

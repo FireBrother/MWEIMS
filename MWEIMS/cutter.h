@@ -13,6 +13,7 @@ namespace cutter {
 	typedef std::unordered_map<Unicode, double> trie_t;
 
 	trie_t global_dict, global_weight;
+	double min_dict_value = -3.14e+100, max_dict_value = 3.14e+100;
 
 	int init_dict(std::vector<std::string> filenames, trie_t *pdict = &global_dict) {
 		LogInfo("Initing dict started.");
@@ -36,6 +37,10 @@ namespace cutter {
 			x.second = log(double(x.second) / double(sum));
 		}
 
+		for_each(dict.begin(), dict.end(), [&](auto x) {
+			min_dict_value = min(min_dict_value, x.second);
+			max_dict_value = max(max_dict_value, x.second);
+		});
 		LogInfo("Initing dict finished.");
 		return 0;
 	}
@@ -67,7 +72,7 @@ namespace cutter {
 	};
 	class cmp { public: bool operator () (const tuple*a, const tuple*b) { return a->w < b->w; } };
 	int ksp(std::vector<std::vector<int> >& path, std::vector<std::vector<double> >& adjmat, int K) {
-		K = int(pow(2, adjmat.size() - 2));
+		K = min(K, int(pow(2, adjmat.size() - 2)));
 		path.resize(K);
 		int N = adjmat.size();
 		for_each(path.begin(), path.end(), [&](auto &x) {x.resize(N); });
@@ -111,16 +116,14 @@ namespace cutter {
 		return 0;
 	}
 
-	std::vector<std::vector<Unicode> > _cut(Unicode sentence, int K = 5, trie_t *pdict = &global_dict, trie_t *pweight = &global_weight) {
+	std::vector<std::vector<Unicode> > _cut(Unicode sentence, size_t K = 5, trie_t *pdict = &global_dict, trie_t *pweight = &global_weight) {
 		if (sentence == u"") return std::vector<std::vector<Unicode> >();
 		auto &dict = *pdict;
 		auto &weight = *pweight;
 		std::vector<std::vector<double> > adjmat;
 		int N = sentence.size() + 1;
-		double min_dict_value = -3.14e+100;;
 		adjmat.resize(N);
 		for_each(adjmat.begin(), adjmat.end(), [&](auto &x) {x.resize(N); });
-		for_each(dict.begin(), dict.end(), [&](auto x) {min_dict_value = min(min_dict_value, x.second); });
 		for (int i = 0; i < N; i++) {
 			for (int j = i + 1; j < N; j++) {
 				Unicode unicode = sentence.substr(i, j - i);
@@ -128,11 +131,24 @@ namespace cutter {
 			}
 		}
 
+		// ·¢ÏÖÓ¢ÎÄ´®
+		int e_begin, e_end;
+		for (e_begin = -1, e_end = 0; e_end < N; e_end++) {
+			if (is_english(sentence[e_end])) {
+				if (e_begin == -1) e_begin = e_end;
+			}
+			else {
+				if (e_begin != -1) {
+					adjmat[e_begin][e_end] = min_dict_value / 2;
+					e_begin = -1;
+				}
+			}
+		}
 		std::vector<std::vector<int> > path;
 		std::vector<std::vector<Unicode> > vecWords;
 		ksp(path, adjmat, K);
 		vecWords.resize(path.size());
-		for (int i = 0; i < path.size(); i++) {
+		for (size_t i = 0; i < path.size(); i++) {
 			int pos = 0;
 			while (pos != N) {
 				vecWords[i].push_back(sentence.substr(pos, path[i][pos] - pos));
@@ -158,8 +174,9 @@ namespace cutter {
 						vecWords[i].push_back(w);
 					}
 				}
-				for (auto &vW : vecWords) { vW.push_back(Unicode(1, sentence[end])); }
 				begin = end + 1;
+				if (sentence[end] != u' ')
+					for (auto &vW : vecWords) { vW.push_back(Unicode(1, sentence[end])); }
 			}
 		}
 		LogDebug("Cutting \"%s\".", Unicode2gbk(sentence.substr(begin, end - begin)).c_str());

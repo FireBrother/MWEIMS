@@ -9,6 +9,10 @@ typedef std::u16string Unicode;
 
 Unicode P_set = u"£¬¡£¡¢£»¡®¡¾¡¿¡¶¡·£¿£º¡°¡±{}£¡@#£¤%¡­&*£¨£©-=¡ª+,./;'[]\\<>?:\"{} | !@#$%^&*() -= _ +¡º¡» ¡Ñ";
 
+bool is_english(char16_t c) {
+	return c >= u'a' && c <= u'z' || c >= u'A' && c <= u'Z';
+}
+
 template<typename T>
 double log2(T v) {
 	return log(v) / log(2);
