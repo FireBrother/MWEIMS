@@ -53,12 +53,14 @@ namespace cutter {
 		for (auto filename : filenames) {
 			std::fstream fin(filename);
 			if (!fin) {
-				LogFatal("no such file %s", filename);
+				LogFatal("no such file %s", filename.c_str());
 			}
 			std::string word;
 			double w;
 			while (fin >> word >> w) {
-				weight[gbk2Unicode(word)] = w;
+				Unicode unicode = gbk2Unicode(word);
+				unicode.erase(unicode.find(u'→'), 1);
+				weight[unicode] = w;
 			}
 		}
 
@@ -72,7 +74,9 @@ namespace cutter {
 	};
 	class cmp { public: bool operator () (const tuple*a, const tuple*b) { return a->w < b->w; } };
 	int ksp(std::vector<std::vector<int> >& path, std::vector<std::vector<double> >& adjmat, int K) {
-		K = min(K, int(pow(2, adjmat.size() - 2)));
+		// 这个写法是防止溢出
+		if (pow(2, adjmat.size() - 2) < double(K))
+			K = int(pow(2, adjmat.size() - 2));
 		path.resize(K);
 		int N = adjmat.size();
 		for_each(path.begin(), path.end(), [&](auto &x) {x.resize(N); });
@@ -127,7 +131,7 @@ namespace cutter {
 		for (int i = 0; i < N; i++) {
 			for (int j = i + 1; j < N; j++) {
 				Unicode unicode = sentence.substr(i, j - i);
-				adjmat[i][j] = get(dict, unicode, min_dict_value);
+				adjmat[i][j] = get(dict, unicode, min_dict_value) / get(weight, unicode, 1.0);
 			}
 		}
 
