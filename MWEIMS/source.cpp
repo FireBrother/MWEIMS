@@ -95,17 +95,19 @@ void calc_statistic() {
 }
 
 int main() {
-	// calc_statistic();
-	cutter::init_dict({ "data\\jieba.dict" });
-	cutter::init_weight({ "result\\weight.txt" });
-	string sentence = "这种计算模型能够象人那样理解自然语言。由于自然语言固有的复杂性，人们对自己理解语言的机制也还是不甚了了，给理解下一个本质性的定义是极其困难的。由于语言是信息的载体，因此，关于计算机对自然语言的理解一般是根据实用的信息处理的观点进行评判的。";
-	while (getline(cin, sentence)) {
-		if (sentence == "EXIT") break;
-		for (auto a : cutter::cut(sentence)) {
-				for (auto w : a)
-					if (get(cutter::global_weight, gbk2Unicode(w), -10.0) != -10.0)
-						cout << w << endl;
-			}
-	}
+	 calc_statistic();
+	//cutter::init_dict({ "data\\jieba.dict" });
+	//cutter::init_weight({ "result\\weight.txt" });
+	//string sentence = "继续推进经济体制和经济增长方式的根本转变，坚定不移地沿着有中国特色社会主义道路前进";
+	////while (getline(cin, sentence)) 
+	//{
+	////if (sentence == "EXIT") break;
+	//	for (auto a : cutter::cut(sentence)) {
+	//		cout << Limonp::join(a.begin(), a.end(), " ") << endl;
+	//		for (auto w : a)
+	//			if (get(cutter::global_weight, gbk2Unicode(w), -10.0) != -10.0)
+	//				cout << w << endl;
+	//	}
+	//}
 	debug_shell(debug_mode_dict);
 }

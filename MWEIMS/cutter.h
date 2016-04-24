@@ -13,7 +13,7 @@ namespace cutter {
 	typedef std::unordered_map<Unicode, double> trie_t;
 
 	trie_t global_dict, global_weight;
-	double min_dict_value = -3.14e+100, max_dict_value = 3.14e+100;
+	double min_dict_value = 3.14e+100, max_dict_value = 3.14e+100;
 
 	int init_dict(std::vector<std::string> filenames, trie_t *pdict = &global_dict) {
 		LogInfo("Initing dict started.");
@@ -131,7 +131,7 @@ namespace cutter {
 		for (int i = 0; i < N; i++) {
 			for (int j = i + 1; j < N; j++) {
 				Unicode unicode = sentence.substr(i, j - i);
-				adjmat[i][j] = get(dict, unicode, min_dict_value) / get(weight, unicode, 1.0);
+				adjmat[i][j] = (get(dict, unicode, min_dict_value*unicode.length()) / (weight, unicode, 1.0));
 			}
 		}
 
@@ -143,7 +143,7 @@ namespace cutter {
 			}
 			else {
 				if (e_begin != -1) {
-					adjmat[e_begin][e_end] = min_dict_value / 2;
+					adjmat[e_begin][e_end] = max_dict_value;
 					e_begin = -1;
 				}
 			}
@@ -171,7 +171,7 @@ namespace cutter {
 		size_t begin, end;
 		for (begin = 0, end = 0; end < sentence.length(); end++) {
 			if (P_set.find(sentence[end]) != P_set.npos) {
-				LogDebug("Cutting \"%s\".", Unicode2gbk(sentence.substr(begin, end - begin)).c_str());
+				// LogDebug("Cutting \"%s\".", Unicode2gbk(sentence.substr(begin, end - begin)).c_str());
 				auto tmp = _cut(sentence.substr(begin, end - begin), K, pdict, pweight);
 				for (size_t i = 0; i < tmp.size(); i++) {
 					for (auto w : tmp[i]) {
@@ -183,7 +183,7 @@ namespace cutter {
 					for (auto &vW : vecWords) { vW.push_back(Unicode(1, sentence[end])); }
 			}
 		}
-		LogDebug("Cutting \"%s\".", Unicode2gbk(sentence.substr(begin, end - begin)).c_str());
+		// LogDebug("Cutting \"%s\".", Unicode2gbk(sentence.substr(begin, end - begin)).c_str());
 		auto tmp = _cut(sentence.substr(begin, end - begin), K, pdict, pweight);
 		for (size_t i = 0; i < tmp.size(); i++) {
 			for (auto w : tmp[i]) {

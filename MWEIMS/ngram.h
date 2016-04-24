@@ -84,7 +84,10 @@ int init_pmi(pmi_t *ppmi = &global_pmi, trie_t *punigram = &global_unigram, trie
 	for (auto b : bigram) {
 		auto w1 = b.first.substr(0, b.first.find(u'¡ú'));
 		auto w2 = b.first.substr(b.first.find(u'¡ú')+1);
-		pmi[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1]* unigram[w2] *tot_bi));
+		pmi[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1] * unigram[w2] * tot_bi));
+		// pmi[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1]* unigram[w2] *tot_bi));
+		// pmi[b.first] = log2((bigram[b.first] * tot_uni*tot_uni * 0.8) / double(unigram[w1] * unigram[w2] * min(unigram[w1], unigram[w2])));
+		pmi[b.first] = log2(bigram[b.first]*(unigram[w1]+unigram[w2])/double(unigram[w1]* unigram[w1]* unigram[w2]* unigram[w2]));
 	}
 
 	LogInfo("Calculating pmi finished.");
