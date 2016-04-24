@@ -18,6 +18,8 @@ pair = [(f1, pmi_exact), (f2, pmi_low), (f3, pmi_high), (f4, pmi_new)]
 
 for p in pair:
     for i, line in enumerate(p[0].readlines()):
+        if i > 10000:
+            break
         line = line.strip()
         w, v = line.split()
         p[1][w] = float(v)
