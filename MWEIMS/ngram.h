@@ -8,6 +8,8 @@
 #include "Limonp\StringUtil.hpp"
 #include "Unicode.h"
 
+#include "experiment.h"
+
 typedef std::unordered_map<Unicode, long long> trie_t;
 typedef std::unordered_map<Unicode, double> pmi_t;
 typedef std::unordered_map<Unicode, double> ent_t;
@@ -40,6 +42,9 @@ int init_ngram(std::vector<std::string> filenames, trie_t *punigram = &global_un
 			std::string s1 = "";
 			std::string s2 = "";
 			for (auto word : words) {
+				if (gbk2Unicode(word).length() == 2) {
+					experiment::dict[gbk2Unicode(word)]++;
+				}
 				if (word == "¡ú") continue;
 				if (is_P(word)) {
 					s1 = s2 = "";
@@ -85,9 +90,15 @@ int init_pmi(pmi_t *ppmi = &global_pmi, trie_t *punigram = &global_unigram, trie
 		auto w1 = b.first.substr(0, b.first.find(u'¡ú'));
 		auto w2 = b.first.substr(b.first.find(u'¡ú')+1);
 		pmi[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1] * unigram[w2] * tot_bi));
-		// pmi[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1]* unigram[w2] *tot_bi));
 		// pmi[b.first] = log2((bigram[b.first] * tot_uni*tot_uni * 0.8) / double(unigram[w1] * unigram[w2] * min(unigram[w1], unigram[w2])));
-		pmi[b.first] = log2(bigram[b.first]*(unigram[w1]+unigram[w2])/double(unigram[w1]* unigram[w1]* unigram[w2]* unigram[w2]));
+		// pmi[b.first] = log2(bigram[b.first]*(unigram[w1]+unigram[w2])/double(unigram[w1]* unigram[w1]* unigram[w2]* unigram[w2]));
+		if (b.first.length() == 3) {
+			experiment::pmi_exact[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1] * unigram[w2] * tot_bi));
+			experiment::pmi_high[b.first] = log2((bigram[b.first] * tot_uni*tot_uni * 0.8) / double(unigram[w1] * unigram[w2] * max(unigram[w1], unigram[w2])));
+			experiment::pmi_laohu[b.first] = log2(bigram[b.first] * (unigram[w1] + unigram[w2]) / double(unigram[w1] * unigram[w1] * unigram[w2] * unigram[w2]));
+			experiment::pmi_shy1[b.first] = experiment::pmi_exact[b.first] - log2(unigram[w1]* unigram[w2]/double(unigram[w1]+ unigram[w2]));
+			experiment::pmi_shy2[b.first] = experiment::pmi_exact[b.first] - log2(2 * unigram[w1] * unigram[w2] / double(unigram[w1] + unigram[w2]));
+		}
 	}
 
 	LogInfo("Calculating pmi finished.");

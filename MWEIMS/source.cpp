@@ -34,14 +34,14 @@ void debug_shell(debug_mode_t debug_mode) {
 }
 
 template<typename TDICT>
-void save(string filename, const TDICT &dict) {
+void save(string filename, const TDICT &dict,long long thresh = 5) {
 	LogInfo("Saving %s started.", filename.c_str());
 	ofstream fout;
 	fout.open(filename, ios::out);
 	vector<pair<Unicode, double> > vec(dict.begin(), dict.end());
 	sort(vec.begin(), vec.end(), [](auto x, auto y) { return x.second > y.second; });
 	for_each(vec.begin(), vec.end(), [&](auto x) {
-		if (get(global_bigram, x.first, (long long)0) > 5) {
+		if (get(global_bigram, x.first, (long long)0) > thresh) {
 			auto lu = x.first.substr(0, x.first.find(u'¡ú'));
 			auto ru = x.first.substr(x.first.find(u'¡ú') + 1);
 			fout << x.first << '\t' << x.second << endl;
@@ -53,6 +53,7 @@ void save(string filename, const TDICT &dict) {
 
 void calc_statistic() {
 	init_ngram({ "data\\PeopleDaily_seg.txt" });
+	cout << experiment::dict.size() << endl;
 	init_pmi();
 	init_ent();
 	ent_t ent, diff_le, diff_re;
@@ -85,13 +86,23 @@ void calc_statistic() {
 		}
 	});
 
-	save("result\\pmi.txt", global_pmi);
-	save("result\\le.txt", global_le);
-	save("result\\re.txt", global_re);
-	save("result\\ent.txt", ent);
-	save("result\\diff_le.txt", diff_le);
-	save("result\\diff_re.txt", diff_re);
-	save("result\\weight.txt", weight);
+	//save("result\\pmi.txt", global_pmi);
+	//save("result\\le.txt", global_le);
+	//save("result\\re.txt", global_re);
+	//save("result\\ent.txt", ent);
+	//save("result\\diff_le.txt", diff_le);
+	//save("result\\diff_re.txt", diff_re);
+	//save("result\\weight.txt", weight);
+
+	string pmis[] = { "pmi_exact", "pmi_high", "pmi_laohu", "pmi_shy1", "pmi_shy2" };
+	save("experiment\\pmi_exact.txt", experiment::pmi_exact);
+	save("experiment\\pmi_high.txt", experiment::pmi_high);
+	save("experiment\\pmi_laohu.txt", experiment::pmi_laohu);
+	save("experiment\\pmi_shy1.txt", experiment::pmi_shy1);
+	save("experiment\\pmi_shy2.txt", experiment::pmi_shy2);
+
+	save("experiment\\dict.txt", experiment::dict, -1);
+	
 }
 
 int main() {
