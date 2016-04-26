@@ -95,9 +95,9 @@ int init_pmi(pmi_t *ppmi = &global_pmi, trie_t *punigram = &global_unigram, trie
 		if (b.first.length() == 3) {
 			experiment::pmi_exact[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1] * unigram[w2] * tot_bi));
 			experiment::pmi_high[b.first] = log2((bigram[b.first] * tot_uni*tot_uni * 0.8) / double(unigram[w1] * unigram[w2] * max(unigram[w1], unigram[w2])));
-			experiment::pmi_laohu[b.first] = log2(bigram[b.first] * (unigram[w1] + unigram[w2]) / double(unigram[w1] * unigram[w1] * unigram[w2] * unigram[w2]));
-			experiment::pmi_shy1[b.first] = experiment::pmi_exact[b.first] - log2(unigram[w1]* unigram[w2]/double(unigram[w1]+ unigram[w2]));
-			experiment::pmi_shy2[b.first] = experiment::pmi_exact[b.first] - log2(2 * unigram[w1] * unigram[w2] / double(unigram[w1] + unigram[w2]));
+			experiment::pmi_laohu[b.first] = log2(bigram[b.first] * (unigram[w1] + unigram[w2])*tot_uni*tot_uni / double(unigram[w1] * unigram[w1] * unigram[w2] * unigram[w2]));
+			experiment::pmi_shy1[b.first] = experiment::pmi_exact[b.first] - log2(unigram[w1]* unigram[w2]/double((unigram[w1]+ unigram[w2])*tot_uni));
+			experiment::pmi_shy2[b.first] = experiment::pmi_exact[b.first] - log2(2 * unigram[w1] * unigram[w2] / double((unigram[w1] + unigram[w2])*tot_uni));
 		}
 	}
 

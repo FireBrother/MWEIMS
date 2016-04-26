@@ -27,7 +27,7 @@ precisoin = {}
 recall = {}
 fmeasure = {}
 
-topKs = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]
+topKs = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 
 for pt in pmi_types:
     correct[pt] = {}
@@ -65,7 +65,7 @@ for op in output_pairs:
     for pt in pmi_types:
         of.write('{},'.format(pt))
         for topK in topKs:
-            of.write('{:.2f},'.format(op[1][pt][topK]))
+            of.write('{:.4f},'.format(op[1][pt][topK]))
         of.write('\n')
     of.write('\n')
 
