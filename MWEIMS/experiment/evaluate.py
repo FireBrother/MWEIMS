@@ -4,10 +4,12 @@ import codecs
 
 pmi_types = ["pmi_exact", "pmi_high", "pmi_laohu", "pmi_shy1", "pmi_shy2"]
 files = {}
+error_files = {}
 pmis = {}
 dic = set()
 for pt in pmi_types:
     files[pt] = codecs.open(pt+'.txt', 'r', 'gbk')
+    error_files[pt] = codecs.open('error_'+pt+'.txt', 'w', 'utf8')
     pmis[pt] = {}
     for i, line in enumerate(files[pt].readlines()):
         line = line.strip()
@@ -27,7 +29,7 @@ precisoin = {}
 recall = {}
 fmeasure = {}
 
-topKs = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]
+topKs = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 
 for pt in pmi_types:
     correct[pt] = {}
@@ -36,7 +38,7 @@ for pt in pmi_types:
     recall[pt] = {}
     fmeasure[pt] = {}
     for i, pair in enumerate(sorted(pmis[pt].iteritems(), key=lambda x: -x[1])):
-        w, _ = pair
+        w, pmi = pair
         if w in dic:
             for topK in topKs:
                 if i < topK:
@@ -47,6 +49,7 @@ for pt in pmi_types:
                 if i < topK:
                     v = error[pt].get(topK, 0)
                     error[pt][topK] = v + 1
+            print >>error_files[pt], w, pmi
 
 for pt in pmi_types:
     for topK in topKs:
@@ -65,7 +68,7 @@ for op in output_pairs:
     for pt in pmi_types:
         of.write('{},'.format(pt))
         for topK in topKs:
-            of.write('{:.2f},'.format(op[1][pt][topK]))
+            of.write('{:.4f},'.format(op[1][pt][topK]))
         of.write('\n')
     of.write('\n')
 
