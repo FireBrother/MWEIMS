@@ -5,11 +5,13 @@ import codecs
 pmi_types = ["pmi_exact", "pmi_high", "pmi_laohu", "pmi_shy1", "pmi_shy2"]
 files = {}
 error_files = {}
+norecall_files = {}
 pmis = {}
 dic = set()
 for pt in pmi_types:
     files[pt] = codecs.open(pt+'.txt', 'r', 'gbk')
     error_files[pt] = codecs.open('error_'+pt+'.txt', 'w', 'utf8')
+    # norecall_files[pt] = codecs.open('norecall_'+pt+'.txt', 'w', 'utf8')
     pmis[pt] = {}
     for i, line in enumerate(files[pt].readlines()):
         line = line.strip()

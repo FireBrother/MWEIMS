@@ -34,7 +34,7 @@ void debug_shell(debug_mode_t debug_mode) {
 }
 
 template<typename TDICT>
-void save(string filename, const TDICT &dict,long long thresh = 5) {
+void save(string filename, const TDICT &dict,long long thresh = 10) {
 	LogInfo("Saving %s started.", filename.c_str());
 	ofstream fout;
 	fout.open(filename, ios::out);

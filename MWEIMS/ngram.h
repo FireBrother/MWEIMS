@@ -45,18 +45,34 @@ int init_ngram(std::vector<std::string> filenames, trie_t *punigram = &global_un
 				if (gbk2Unicode(word).length() == 2) {
 					experiment::dict[gbk2Unicode(word)]++;
 				}
+				else if (gbk2Unicode(word).length() != 1) {
+					s1 = s2 = "";
+					continue;
+				}
 				if (word == "¡ú") continue;
 				if (is_P(word)) {
 					s1 = s2 = "";
 					continue;
 				}
-				unigram[gbk2Unicode(word)]++;
-				if (s2 != "") {
-					bigram[gbk2Unicode(make_bigram(s2, word))]++;
-					if (s1 != "") trigram[gbk2Unicode(make_trigram(s1, s2, word))]++;
+				Unicode uni = gbk2Unicode(word);
+				for (auto c : uni) {
+					Unicode unic(1, c);
+					std::string cs = Unicode2gbk(unic);
+					unigram[gbk2Unicode(cs)]++;
+					if (s2 != "") {
+						bigram[gbk2Unicode(make_bigram(s2, cs))]++;
+						if (s1 != "") trigram[gbk2Unicode(make_trigram(s1, s2, cs))]++;
+					}
+					s1 = s2;
+					s2 = cs;
 				}
-				s1 = s2;
-				s2 = word;
+				//unigram[gbk2Unicode(word)]++;
+				//if (s2 != "") {
+				//	bigram[gbk2Unicode(make_bigram(s2, word))]++;
+				//	if (s1 != "") trigram[gbk2Unicode(make_trigram(s1, s2, word))]++;
+				//}
+				//s1 = s2;
+				//s2 = word;
 			}
 		}
 	}
@@ -95,7 +111,10 @@ int init_pmi(pmi_t *ppmi = &global_pmi, trie_t *punigram = &global_unigram, trie
 		if (b.first.length() == 3) {
 			experiment::pmi_exact[b.first] = log2((bigram[b.first] * tot_uni*tot_uni) / double(unigram[w1] * unigram[w2] * tot_bi));
 			experiment::pmi_high[b.first] = log2((bigram[b.first] * tot_uni*tot_uni * 0.8) / double(unigram[w1] * unigram[w2] * max(unigram[w1], unigram[w2])));
-			experiment::pmi_laohu[b.first] = log2(bigram[b.first] * (unigram[w1] + unigram[w2])*tot_uni*tot_uni / double(unigram[w1] * unigram[w1] * unigram[w2] * unigram[w2]));
+			experiment::pmi_laohu[b.first] = log2(bigram[b.first] * (unigram[w1] + unigram[w2]) / double(unigram[w1] * unigram[w2]) *tot_uni*tot_uni /double(unigram[w1] * unigram[w2]));
+			if (isnan(experiment::pmi_laohu[b.first])) {
+				LogFatal("%s, %lld, %lld, %lld", Unicode2gbk(b.first).c_str(), bigram[b.first], unigram[w1], unigram[w2]);
+			}
 			experiment::pmi_shy1[b.first] = experiment::pmi_exact[b.first] - log2(unigram[w1]* unigram[w2]/double((unigram[w1]+ unigram[w2])*tot_uni));
 			experiment::pmi_shy2[b.first] = experiment::pmi_exact[b.first] - log2(2 * unigram[w1] * unigram[w2] / double((unigram[w1] + unigram[w2])*tot_uni));
 		}
